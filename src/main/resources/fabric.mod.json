@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "wathemappicker",
+  "version": "${version}",
+  "name": "WatheMapPicker",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/wathemappicker/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.nebula.wathemappicker.client.WathemappickerClient"
+    ],
+    "cardinal-components": [
+      "net.nebula.wathemappicker.MapPickerComponents"
+    ],
+    "main": [
+      "net.nebula.wathemappicker.Wathemappicker"
+    ]
+  },
+  "mixins": [
+    "wathemappicker.mixins.json",
+    {
+      "config": "wathemappicker.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "custom": {
+    "cardinal-components": [
+        "wathemappicker:mapvote"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
