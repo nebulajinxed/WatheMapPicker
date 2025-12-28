@@ -23,7 +23,7 @@ public abstract class MapVotingMixin extends LimitedHandledScreen<PlayerScreenHa
 
     @Inject(method = "init", at = @At("HEAD"))
     void renderGuidebookButton(CallbackInfo ci) {
-        MapVotingWidget child = new MapVotingWidget(null, this.width / 2 - 15, 10, Items.PAPER.getDefaultStack(), button -> MinecraftClient.getInstance().setScreen(new MapVotingScreen()), "nebula.map_voting.tooltip");
+        MapVotingWidget child = new MapVotingWidget(null, this.width / 2 - 15, 10, Items.PAPER.getDefaultStack(), button -> MinecraftClient.getInstance().setScreen(new MapVotingScreen()), "map_voting.wathemappicker.tooltip");
         this.addDrawableChild(child);
     }
 }

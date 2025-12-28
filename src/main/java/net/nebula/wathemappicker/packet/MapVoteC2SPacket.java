@@ -92,7 +92,6 @@ public record MapVoteC2SPacket(String mapIdentifier) implements CustomPayload {
                 winningMap = entry.getKey();
             }
         }
-        System.out.println("winning map: " + winningMap);
         return winningMap;
 
     }

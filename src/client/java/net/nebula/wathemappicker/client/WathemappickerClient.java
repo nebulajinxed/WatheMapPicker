@@ -3,6 +3,7 @@ package net.nebula.wathemappicker.client;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.nebula.wathemappicker.client.gui.ClientItemConfig;
 import net.nebula.wathemappicker.client.gui.screen.MapVotingScreen;
 import net.nebula.wathemappicker.packet.DimensionsS2CPacket;
 
@@ -16,6 +17,7 @@ public class WathemappickerClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         registerPackets();
+        ClientItemConfig.load();
     }
 
     public static void registerPackets() {

@@ -36,7 +36,35 @@ public class Wathemappicker implements ModInitializer {
         CommandRegistration.register();
         registerPackets();
         registerListeners();
+    }
 
+    public static Identifier id(String path) {
+        return Identifier.of("wathemappicker", path);
+    }
+
+    public static void registerListeners() {
+        ServerPlayConnectionEvents.JOIN.register(((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
+            ServerPlayNetworking.send(serverPlayNetworkHandler.getPlayer(), new DimensionsS2CPacket(getDimensionString(minecraftServer)));
+            MapVoteC2SPacket.removeVote(serverPlayNetworkHandler.getPlayer());
+
+            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(serverPlayNetworkHandler.getPlayer().getWorld());
+
+            if (!gameWorldComponent.isRunning()) {
+                if (!Objects.equals(MapManager.currentDimension, serverPlayNetworkHandler.getPlayer().getWorld().getRegistryKey().getValue().toString())) {
+                    MapManager.teleportPlayer(serverPlayNetworkHandler.getPlayer());
+                }
+            } else if (!GameFunctions.isPlayerAliveAndSurvival(serverPlayNetworkHandler.getPlayer())) {
+                MapManager.teleportPlayer(serverPlayNetworkHandler.getPlayer());
+            }
+        }));
+
+        ServerPlayConnectionEvents.DISCONNECT.register(((serverPlayNetworkHandler, minecraftServer) -> {
+            MapVoteC2SPacket.removeVote(serverPlayNetworkHandler.getPlayer());
+        }));
+
+        ServerTickEvents.START_WORLD_TICK.register(serverWorld -> {
+            GameWorldComponent.KEY.get(serverWorld).serverTick();
+        });
 
         GameEvents.ON_GAME_STOP.register(gameMode -> {
             String win = MapVoteC2SPacket.getWinningMap();
@@ -90,35 +118,6 @@ public class Wathemappicker implements ModInitializer {
                 }
             }
         }));
-    }
-
-    public static Identifier id(String path) {
-        return Identifier.of("wathemappicker", path);
-    }
-
-    public static void registerListeners() {
-        ServerPlayConnectionEvents.JOIN.register(((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
-            ServerPlayNetworking.send(serverPlayNetworkHandler.getPlayer(), new DimensionsS2CPacket(getDimensionString(minecraftServer)));
-            MapVoteC2SPacket.removeVote(serverPlayNetworkHandler.getPlayer());
-
-            GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(serverPlayNetworkHandler.getPlayer().getWorld());
-
-            if (!gameWorldComponent.isRunning()) {
-                if (!Objects.equals(MapManager.currentDimension, serverPlayNetworkHandler.getPlayer().getWorld().getRegistryKey().getValue().toString())) {
-                    MapManager.teleportPlayer(serverPlayNetworkHandler.getPlayer());
-                }
-            } else if (!GameFunctions.isPlayerAliveAndSurvival(serverPlayNetworkHandler.getPlayer())) {
-                MapManager.teleportPlayer(serverPlayNetworkHandler.getPlayer());
-            }
-        }));
-
-        ServerPlayConnectionEvents.DISCONNECT.register(((serverPlayNetworkHandler, minecraftServer) -> {
-            MapVoteC2SPacket.removeVote(serverPlayNetworkHandler.getPlayer());
-        }));
-
-        ServerTickEvents.START_WORLD_TICK.register(serverWorld -> {
-            GameWorldComponent.KEY.get(serverWorld).serverTick();
-        });
     }
 
     public static void registerPackets() {

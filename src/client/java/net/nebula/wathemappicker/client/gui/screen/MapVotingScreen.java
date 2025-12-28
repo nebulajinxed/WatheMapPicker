@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.nebula.wathemappicker.MapVotePlayerComponent;
+import net.nebula.wathemappicker.client.gui.ClientItemConfig;
 import net.nebula.wathemappicker.client.gui.widget.MapVotingWidget;
 import net.nebula.wathemappicker.packet.MapVoteC2SPacket;
 import org.lwjgl.glfw.GLFW;
@@ -44,9 +45,16 @@ public class MapVotingScreen extends Screen {
         for (int i = 0; i < dimensions.size(); i++) {
             String dim = dimensions.get(i);
             int x = startX + i * (itemSize + padding);
+            String path = dim.substring(dim.indexOf(":") + 1);
 
             // Example ItemStack: you can customize per dimension
-            ItemStack item = Items.PAPER.getDefaultStack();
+            ItemStack item;
+            if (ClientItemConfig.get(path) != null) {
+                item = ClientItemConfig.get(path).getDefaultStack();
+                System.out.println("set item: " + item.getName());
+            }
+            else
+                item = Items.PAPER.getDefaultStack();
 
             MapVotingWidget widget = new MapVotingWidget(
                     null, // Pass screen if needed, otherwise null
@@ -57,7 +65,7 @@ public class MapVotingScreen extends Screen {
                         ClientPlayNetworking.send(new MapVoteC2SPacket(dim));
                         System.out.println("Voted for dimension: " + dim);
                     },
-                    "nebula.map_voting." + dim.substring(dim.indexOf(":") + 1)
+                    "map_voting.map." + dim.substring(dim.indexOf(":") + 1)
             );
 
             this.addDrawableChild(widget);

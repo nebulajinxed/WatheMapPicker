@@ -123,6 +123,9 @@ public class MapManager {
         return null;
     }
 
+
+
+    // State saving / loading
     public static void saveCurrentDimension(MinecraftServer server) {
         if (server == null || currentDimension == null || currentDimension.isEmpty()) {
             return;
@@ -131,15 +134,34 @@ public class MapManager {
         Path path = server.getSavePath(WorldSavePath.ROOT)
                 .resolve("wathemappicker.json");
 
-        JsonObject json = new JsonObject();
+        JsonObject json;
+
+        // Load existing JSON if it exists
+        if (Files.exists(path)) {
+            try (Reader reader = Files.newBufferedReader(path)) {
+                json = GSON.fromJson(reader, JsonObject.class);
+                if (json == null) {
+                    json = new JsonObject();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                json = new JsonObject();
+            }
+        } else {
+            json = new JsonObject();
+        }
+
+        // Update only what we care about
         json.addProperty("currentDimension", currentDimension);
 
+        // Write back
         try (Writer writer = Files.newBufferedWriter(path)) {
             GSON.toJson(json, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     public static void loadCurrentDimension(MinecraftServer server) {
         Path path = server.getSavePath(WorldSavePath.ROOT)

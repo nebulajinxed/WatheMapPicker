@@ -1,6 +1,7 @@
 {
-  "nebula.map_voting.tooltip": "Map Voting",
-  "nebula.map_voting.townofharpy": "Town of Harpy",
-  "nebula.map_voting.borealisexpress": "Borealis Express",
-  "nebula.map_voting.harpyexpress": "Harpy Express"
+  "map_voting.wathemappicker.tooltip": "Map Voting",
+  "map_voting.map.townofharpy": "Town of Harpy",
+  "map_voting.map.townofharpy.item": "minecraft:diamond",
+  "map_voting.map.borealisexpress": "Borealis Express",
+  "map_voting.map.harpyexpress": "Harpy Express"
 }
