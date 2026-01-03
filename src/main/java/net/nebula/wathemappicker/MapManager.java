@@ -5,9 +5,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import dev.doctor4t.wathe.cca.MapVariablesWorldComponent;
+import dev.doctor4t.wathe.api.event.GameEvents;
+import dev.doctor4t.wathe.cca.*;
 import dev.doctor4t.wathe.compat.TrainVoicePlugin;
+import dev.doctor4t.wathe.entity.FirecrackerEntity;
+import dev.doctor4t.wathe.entity.NoteEntity;
+import dev.doctor4t.wathe.entity.PlayerBodyEntity;
 import dev.doctor4t.wathe.game.GameFunctions;
+import dev.doctor4t.wathe.index.WatheEntities;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
@@ -55,7 +60,7 @@ public class MapManager {
             return;
         }
 
-        GameFunctions.finalizeGame(world);
+        finalizeGame(world);
 
         MapVariablesWorldComponent spawn = MapVariablesWorldComponent.KEY.get(world);
 
@@ -181,5 +186,36 @@ public class MapManager {
         }
     }
 
+    public static void finalizeGame(ServerWorld world) {
+        GameWorldComponent gameComponent = GameWorldComponent.KEY.get(world);
+//        GameEvents.ON_GAME_STOP.invoker().onGameStop(gameComponent.getGameMode());
+        gameComponent.getGameMode().finalizeGame(world, gameComponent);
+        WorldBlackoutComponent.KEY.get(world).reset();
+        TrainWorldComponent trainComponent = TrainWorldComponent.KEY.get(world);
+        trainComponent.setSpeed(0);
+        trainComponent.setTimeOfDay(TrainWorldComponent.TimeOfDay.DAY);
 
+        for(PlayerBodyEntity body : world.getEntitiesByType(WatheEntities.PLAYER_BODY, (playerBodyEntity) -> true)) {
+            body.discard();
+        }
+
+        for(FirecrackerEntity entity : world.getEntitiesByType(WatheEntities.FIRECRACKER, (entityx) -> true)) {
+            entity.discard();
+        }
+
+        for(NoteEntity entity : world.getEntitiesByType(WatheEntities.NOTE, (entityx) -> true)) {
+            entity.discard();
+        }
+
+        for(ServerPlayerEntity player : world.getPlayers()) {
+            GameFunctions.resetPlayer(player);
+        }
+
+        ((GameTimeComponent)GameTimeComponent.KEY.get(world)).reset();
+        gameComponent.clearRoleMap();
+        gameComponent.setGameStatus(GameWorldComponent.GameStatus.INACTIVE);
+        trainComponent.setTime(0);
+        gameComponent.sync();
+        ((GameEvents.OnFinishFinalize)GameEvents.ON_FINISH_FINALIZE.invoker()).onFinishFinalize(world, gameComponent);
+    }
 }

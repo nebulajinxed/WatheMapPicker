@@ -17,6 +17,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.nebula.wathemappicker.packet.DimensionItemS2CPacket;
 import net.nebula.wathemappicker.packet.DimensionsS2CPacket;
 import net.nebula.wathemappicker.packet.MapVoteC2SPacket;
 
@@ -31,7 +32,10 @@ public class Wathemappicker implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> SERVER_INSTANCE = server);
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            SERVER_INSTANCE = server;
+            MapVotingItemConfig.load(server);
+        });
 
         CommandRegistration.register();
         registerPackets();
@@ -45,6 +49,8 @@ public class Wathemappicker implements ModInitializer {
     public static void registerListeners() {
         ServerPlayConnectionEvents.JOIN.register(((serverPlayNetworkHandler, packetSender, minecraftServer) -> {
             ServerPlayNetworking.send(serverPlayNetworkHandler.getPlayer(), new DimensionsS2CPacket(getDimensionString(minecraftServer)));
+            ServerPlayNetworking.send(serverPlayNetworkHandler.getPlayer(), new DimensionItemS2CPacket(MapVotingItemConfig.mapToString(MapVotingItemConfig.ITEMS)));
+
             MapVoteC2SPacket.removeVote(serverPlayNetworkHandler.getPlayer());
 
             GameWorldComponent gameWorldComponent = GameWorldComponent.KEY.get(serverPlayNetworkHandler.getPlayer().getWorld());
@@ -122,6 +128,7 @@ public class Wathemappicker implements ModInitializer {
 
     public static void registerPackets() {
         PayloadTypeRegistry.playS2C().register(DimensionsS2CPacket.ID, DimensionsS2CPacket.CODEC);
+        PayloadTypeRegistry.playS2C().register(DimensionItemS2CPacket.ID, DimensionItemS2CPacket.CODEC);
         PayloadTypeRegistry.playC2S().register(MapVoteC2SPacket.ID, MapVoteC2SPacket.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(MapVoteC2SPacket.ID, new MapVoteC2SPacket.Receiver());
